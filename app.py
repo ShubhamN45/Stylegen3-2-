@@ -77,7 +77,7 @@ def make_transform(translate: tuple[float, float], angle: float) -> np.ndarray:
 
 def generate_z(z_dim: int, seed: int, device: torch.device) -> torch.Tensor:
     return torch.from_numpy(np.random.RandomState(seed).randn(
-        1, z_dim)).to(device)
+        1, z_dim)).to(device).float()
 
 
 @torch.inference_mode()
