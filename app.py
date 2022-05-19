@@ -8,13 +8,13 @@ import os
 import pickle
 import sys
 
-sys.path.insert(0, 'stylegan3')
-
 import gradio as gr
 import numpy as np
 import torch
 import torch.nn as nn
 from huggingface_hub import hf_hub_download
+
+sys.path.insert(0, 'stylegan3')
 
 ORIGINAL_REPO_URL = 'https://github.com/NVlabs/stylegan3'
 TITLE = 'NVlabs/stylegan3'
@@ -116,8 +116,6 @@ def load_model(file_name: str, device: torch.device) -> nn.Module:
 
 
 def main():
-    gr.close_all()
-
     args = parse_args()
     device = torch.device(args.device)
 
