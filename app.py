@@ -16,9 +16,11 @@ from huggingface_hub import hf_hub_download
 
 sys.path.insert(0, 'stylegan3')
 
-ORIGINAL_REPO_URL = 'https://github.com/NVlabs/stylegan3'
 TITLE = 'NVlabs/stylegan3'
-DESCRIPTION = f'This is a demo for {ORIGINAL_REPO_URL}.'
+DESCRIPTION = '''This is an unofficial demo for https://github.com/NVlabs/stylegan3.
+
+Expected execution time on Hugging Face Spaces: 50s
+'''
 SAMPLE_IMAGE_DIR = 'https://huggingface.co/spaces/hysts/StyleGAN3/resolve/main/samples'
 ARTICLE = f'''## Generated images
 - truncation: 0.7
@@ -42,6 +44,8 @@ ARTICLE = f'''## Generated images
 - size: 1024x1024
 - seed: 0-99
 ![MetFaces-U samples]({SAMPLE_IMAGE_DIR}/metfaces-u.jpg)
+
+<center><img src="https://visitor-badge.glitch.me/badge?page_id=hysts.stylegan3" alt="visitor badge"/></center>
 '''
 
 TOKEN = os.environ['TOKEN']
