@@ -14,7 +14,7 @@ current_dir = pathlib.Path(__file__).parent
 submodule_dir = current_dir / 'stylegan3'
 sys.path.insert(0, submodule_dir.as_posix())
 
-HF_TOKEN = os.environ['HF_TOKEN']
+HF_TOKEN = os.getenv('HF_TOKEN')
 
 
 class Model:
@@ -33,8 +33,9 @@ class Model:
         'MetFaces-U-1024-T': 'stylegan3-t-metfacesu-1024x1024.pkl',
     }
 
-    def __init__(self, device: str | torch.device):
-        self.device = torch.device(device)
+    def __init__(self):
+        self.device = torch.device(
+            'cuda:0' if torch.cuda.is_available() else 'cpu')
         self._download_all_models()
         self.model_name = 'FFHQ-1024-R'
         self.model = self._load_model(self.model_name)
