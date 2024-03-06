@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import pathlib
 import pickle
 import sys
@@ -11,42 +10,37 @@ import torch.nn as nn
 from huggingface_hub import hf_hub_download
 
 current_dir = pathlib.Path(__file__).parent
-submodule_dir = current_dir / 'stylegan3'
+submodule_dir = current_dir / "stylegan3"
 sys.path.insert(0, submodule_dir.as_posix())
-
-HF_TOKEN = os.getenv('HF_TOKEN')
 
 
 class Model:
     MODEL_NAME_DICT = {
-        'AFHQv2-512-R': 'stylegan3-r-afhqv2-512x512.pkl',
-        'FFHQ-1024-R': 'stylegan3-r-ffhq-1024x1024.pkl',
-        'FFHQ-U-256-R': 'stylegan3-r-ffhqu-256x256.pkl',
-        'FFHQ-U-1024-R': 'stylegan3-r-ffhqu-1024x1024.pkl',
-        'MetFaces-1024-R': 'stylegan3-r-metfaces-1024x1024.pkl',
-        'MetFaces-U-1024-R': 'stylegan3-r-metfacesu-1024x1024.pkl',
-        'AFHQv2-512-T': 'stylegan3-t-afhqv2-512x512.pkl',
-        'FFHQ-1024-T': 'stylegan3-t-ffhq-1024x1024.pkl',
-        'FFHQ-U-256-T': 'stylegan3-t-ffhqu-256x256.pkl',
-        'FFHQ-U-1024-T': 'stylegan3-t-ffhqu-1024x1024.pkl',
-        'MetFaces-1024-T': 'stylegan3-t-metfaces-1024x1024.pkl',
-        'MetFaces-U-1024-T': 'stylegan3-t-metfacesu-1024x1024.pkl',
+        "AFHQv2-512-R": "stylegan3-r-afhqv2-512x512.pkl",
+        "FFHQ-1024-R": "stylegan3-r-ffhq-1024x1024.pkl",
+        "FFHQ-U-256-R": "stylegan3-r-ffhqu-256x256.pkl",
+        "FFHQ-U-1024-R": "stylegan3-r-ffhqu-1024x1024.pkl",
+        "MetFaces-1024-R": "stylegan3-r-metfaces-1024x1024.pkl",
+        "MetFaces-U-1024-R": "stylegan3-r-metfacesu-1024x1024.pkl",
+        "AFHQv2-512-T": "stylegan3-t-afhqv2-512x512.pkl",
+        "FFHQ-1024-T": "stylegan3-t-ffhq-1024x1024.pkl",
+        "FFHQ-U-256-T": "stylegan3-t-ffhqu-256x256.pkl",
+        "FFHQ-U-1024-T": "stylegan3-t-ffhqu-1024x1024.pkl",
+        "MetFaces-1024-T": "stylegan3-t-metfaces-1024x1024.pkl",
+        "MetFaces-U-1024-T": "stylegan3-t-metfacesu-1024x1024.pkl",
     }
 
     def __init__(self):
-        self.device = torch.device(
-            'cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self._download_all_models()
-        self.model_name = 'FFHQ-1024-R'
+        self.model_name = "FFHQ-1024-R"
         self.model = self._load_model(self.model_name)
 
     def _load_model(self, model_name: str) -> nn.Module:
         file_name = self.MODEL_NAME_DICT[model_name]
-        path = hf_hub_download('hysts/StyleGAN3',
-                               f'models/{file_name}',
-                               use_auth_token=HF_TOKEN)
-        with open(path, 'rb') as f:
-            model = pickle.load(f)['G_ema']
+        path = hf_hub_download("hysts/StyleGAN3", f"models/{file_name}")
+        with open(path, "rb") as f:
+            model = pickle.load(f)["G_ema"]
         model.eval()
         model.to(self.device)
         return model
@@ -62,8 +56,7 @@ class Model:
             self._load_model(name)
 
     @staticmethod
-    def make_transform(translate: tuple[float, float],
-                       angle: float) -> np.ndarray:
+    def make_transform(translate: tuple[float, float], angle: float) -> np.ndarray:
         mat = np.eye(3)
         sin = np.sin(angle / 360 * np.pi * 2)
         cos = np.cos(angle / 360 * np.pi * 2)
@@ -81,8 +74,7 @@ class Model:
         return torch.from_numpy(z).float().to(self.device)
 
     def postprocess(self, tensor: torch.Tensor) -> np.ndarray:
-        tensor = (tensor.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(
-            torch.uint8)
+        tensor = (tensor.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
         return tensor.cpu().numpy()
 
     def set_transform(self, tx: float, ty: float, angle: float) -> None:
@@ -91,12 +83,10 @@ class Model:
         self.model.synthesis.input.transform.copy_(torch.from_numpy(mat))
 
     @torch.inference_mode()
-    def generate(self, z: torch.Tensor, label: torch.Tensor,
-                 truncation_psi: float) -> torch.Tensor:
+    def generate(self, z: torch.Tensor, label: torch.Tensor, truncation_psi: float) -> torch.Tensor:
         return self.model(z, label, truncation_psi=truncation_psi)
 
-    def generate_image(self, seed: int, truncation_psi: float, tx: float,
-                       ty: float, angle: float) -> np.ndarray:
+    def generate_image(self, seed: int, truncation_psi: float, tx: float, ty: float, angle: float) -> np.ndarray:
         self.set_transform(tx, ty, angle)
 
         z = self.generate_z(seed)
@@ -106,8 +96,8 @@ class Model:
         out = self.postprocess(out)
         return out[0]
 
-    def set_model_and_generate_image(self, model_name: str, seed: int,
-                                     truncation_psi: float, tx: float,
-                                     ty: float, angle: float) -> np.ndarray:
+    def set_model_and_generate_image(
+        self, model_name: str, seed: int, truncation_psi: float, tx: float, ty: float, angle: float
+    ) -> np.ndarray:
         self.set_model(model_name)
         return self.generate_image(seed, truncation_psi, tx, ty, angle)
